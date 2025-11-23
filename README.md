@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Django E-Commerce Marketplace
 
 A full-featured e-commerce web application built with Django, featuring server-rendered HTML templates, responsive design, and comprehensive shopping functionality.
@@ -259,3 +260,7 @@ This project is open source and available for educational and commercial use.
 
 For issues or questions, please check the Django documentation or create an issue in the project repository.
 
+=======
+# market
+market
+>>>>>>> 60f26b1e4f83e81020b41a7e37f1bb5377e645c2
