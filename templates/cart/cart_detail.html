@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Shopping Cart - Marketplace{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Shopping Cart</h1>
+    
+    {% if cart %}
+        <div class="cart">
+            {% for item in cart %}
+                <div class="cart-item" data-product-id="{{ item.product.id }}">
+                    {% if item.product.image %}
+                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="cart-item__image">
+                    {% else %}
+                        <div class="cart-item__image" style="background-color: #F9FAFB;"></div>
+                    {% endif %}
+                    
+                    <div class="cart-item__details">
+                        <h3 class="cart-item__name">
+                            <a href="{{ item.product.get_absolute_url }}">{{ item.product.name }}</a>
+                        </h3>
+                        <p class="cart-item__price">${{ item.price }} each</p>
+                    </div>
+                    
+                    <div class="cart-item__quantity">
+                        <button class="quantity-btn" data-action="decrease" data-product-id="{{ item.product.id }}">-</button>
+                        <input type="number" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}" 
+                               data-product-id="{{ item.product.id }}" class="quantity-input">
+                        <button class="quantity-btn" data-action="increase" data-product-id="{{ item.product.id }}">+</button>
+                    </div>
+                    
+                    <div class="cart-item__subtotal" data-subtotal="{{ item.product.id }}">
+                        ${{ item.total_price }}
+                    </div>
+                    
+                    <form method="post" action="{% url 'cart:cart_remove' item.product.id %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="cart-item__remove">Remove</button>
+                    </form>
+                </div>
+            {% endfor %}
+            
+            <div class="cart__summary">
+                <div class="cart__total">
+                    Total: $<span id="cartTotal">{{ cart.get_total }}</span>
+                </div>
+                <div style="margin-top: 1rem;">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'orders:order_create' %}" class="btn btn--flame">Proceed to Checkout</a>
+                    {% else %}
+                        <p>Please <a href="{% url 'accounts:login' %}">login</a> to checkout.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <p>Your cart is empty. <a href="{% url 'catalog:product_list' %}">Browse products</a></p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const quantityInputs = document.querySelectorAll('.quantity-input');
+    const quantityButtons = document.querySelectorAll('.quantity-btn');
+    
+    function updateCart(productId, quantity) {
+        const formData = new FormData();
+        formData.append('quantity', quantity);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+        
+        fetch(`/cart/update/${productId}/`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('cartTotal').textContent = data.total;
+                document.querySelector(`[data-subtotal="${productId}"]`).textContent = '$' + data.subtotal;
+                document.getElementById('cartBadge').textContent = data.item_count;
+            } else {
+                alert(data.error || 'Error updating cart');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            location.reload();
+        });
+    }
+    
+    quantityInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            const productId = this.dataset.productId;
+            const quantity = parseInt(this.value);
+            if (quantity > 0) {
+                updateCart(productId, quantity);
+            }
+        });
+    });
+    
+    quantityButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.dataset.productId;
+            const action = this.dataset.action;
+            const input = document.querySelector(`.quantity-input[data-product-id="${productId}"]`);
+            let quantity = parseInt(input.value);
+            
+            if (action === 'increase') {
+                quantity++;
+            } else if (action === 'decrease' && quantity > 1) {
+                quantity--;
+            }
+            
+            if (quantity > 0) {
+                input.value = quantity;
+                updateCart(productId, quantity);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
+

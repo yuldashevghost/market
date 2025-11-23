@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Order #{{ order.id }} - Marketplace{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Order #{{ order.id }}</h1>
+    
+    <div style="margin: 2rem 0;">
+        <p><strong>Status:</strong> <span class="status-badge {{ order.get_status_display_class }}">{{ order.get_status_display }}</span></p>
+        <p><strong>Payment Status:</strong> {{ order.get_payment_status_display }}</p>
+        <p><strong>Order Date:</strong> {{ order.created_at|date:"F d, Y H:i" }}</p>
+        <p><strong>Total Amount:</strong> <span style="font-size: 1.25rem; font-weight: bold; color: var(--color-primary);">${{ order.total_amount }}</span></p>
+    </div>
+    
+    <div style="margin: 2rem 0;">
+        <h2>Shipping Address</h2>
+        <p>{{ order.shipping_address }}<br>
+        {{ order.shipping_city }}, {{ order.shipping_state }} {{ order.shipping_zip }}<br>
+        {{ order.shipping_country }}</p>
+    </div>
+    
+    <div style="margin: 2rem 0;">
+        <h2>Order Items</h2>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+            <thead>
+                <tr style="border-bottom: 2px solid var(--color-border);">
+                    <th style="text-align: left; padding: 1rem;">Product</th>
+                    <th style="text-align: right; padding: 1rem;">Price</th>
+                    <th style="text-align: center; padding: 1rem;">Quantity</th>
+                    <th style="text-align: right; padding: 1rem;">Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in order.items.all %}
+                    <tr style="border-bottom: 1px solid var(--color-border);">
+                        <td style="padding: 1rem;">{{ item.product_name }}</td>
+                        <td style="text-align: right; padding: 1rem;">${{ item.price_at_purchase }}</td>
+                        <td style="text-align: center; padding: 1rem;">{{ item.quantity }}</td>
+                        <td style="text-align: right; padding: 1rem;">${{ item.get_subtotal }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div style="margin-top: 2rem;">
+        <a href="{% url 'accounts:profile' %}" class="btn btn--outline">Back to Profile</a>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Order Management - Dashboard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Order Management</h1>
+    
+    <div style="margin: 1.5rem 0;">
+        <a href="?status=" class="btn btn--outline">All Orders</a>
+        <a href="?status=PENDING" class="btn btn--outline">Pending</a>
+        <a href="?status=PROCESSING" class="btn btn--outline">Processing</a>
+        <a href="?status=DELIVERING" class="btn btn--outline">Delivering</a>
+        <a href="?status=DELIVERED" class="btn btn--outline">Delivered</a>
+    </div>
+    
+    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+        <thead>
+            <tr style="border-bottom: 2px solid var(--color-border);">
+                <th style="text-align: left; padding: 1rem;">Order ID</th>
+                <th style="text-align: left; padding: 1rem;">Customer</th>
+                <th style="text-align: left; padding: 1rem;">Status</th>
+                <th style="text-align: left; padding: 1rem;">Payment</th>
+                <th style="text-align: right; padding: 1rem;">Total</th>
+                <th style="text-align: left; padding: 1rem;">Date</th>
+                <th style="text-align: left; padding: 1rem;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+                <tr style="border-bottom: 1px solid var(--color-border);">
+                    <td style="padding: 1rem;">#{{ order.id }}</td>
+                    <td style="padding: 1rem;">{{ order.user.username }}</td>
+                    <td style="padding: 1rem;">
+                        <span class="status-badge {{ order.get_status_display_class }}">
+                            {{ order.get_status_display }}
+                        </span>
+                    </td>
+                    <td style="padding: 1rem;">{{ order.get_payment_status_display }}</td>
+                    <td style="text-align: right; padding: 1rem;">${{ order.total_amount }}</td>
+                    <td style="padding: 1rem;">{{ order.created_at|date:"M d, Y" }}</td>
+                    <td style="padding: 1rem;">
+                        <a href="/admin/orders/order/{{ order.id }}/change/" class="btn btn--small btn--primary">Edit</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="7" style="padding: 2rem; text-align: center;">No orders found.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+

@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Register - Marketplace{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 500px; margin: 3rem auto;">
+    <h1>Register</h1>
+    
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="{{ form.username.id_for_label }}">Username</label>
+            {{ form.username }}
+            {% if form.username.errors %}
+                <div style="color: var(--color-error); font-size: 0.875rem; margin-top: 0.25rem;">
+                    {{ form.username.errors }}
+                </div>
+            {% endif %}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.email.id_for_label }}">Email</label>
+            {{ form.email }}
+            {% if form.email.errors %}
+                <div style="color: var(--color-error); font-size: 0.875rem; margin-top: 0.25rem;">
+                    {{ form.email.errors }}
+                </div>
+            {% endif %}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.password1.id_for_label }}">Password</label>
+            {{ form.password1 }}
+            {% if form.password1.errors %}
+                <div style="color: var(--color-error); font-size: 0.875rem; margin-top: 0.25rem;">
+                    {{ form.password1.errors }}
+                </div>
+            {% endif %}
+        </div>
+        <div class="form-group">
+            <label for="{{ form.password2.id_for_label }}">Confirm Password</label>
+            {{ form.password2 }}
+            {% if form.password2.errors %}
+                <div style="color: var(--color-error); font-size: 0.875rem; margin-top: 0.25rem;">
+                    {{ form.password2.errors }}
+                </div>
+            {% endif %}
+        </div>
+        <button type="submit" class="btn btn--primary" style="width: 100%;">Register</button>
+    </form>
+    
+    <p style="margin-top: 1.5rem; text-align: center;">
+        Already have an account? <a href="{% url 'accounts:login' %}">Login here</a>
+    </p>
+</div>
+{% endblock %}
+

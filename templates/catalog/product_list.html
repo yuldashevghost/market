@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Products - Marketplace{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Products</h1>
+    
+    <div class="filters">
+        <button class="btn filters__toggle" id="filterToggle">Toggle Filters</button>
+        <aside class="filters__sidebar" id="filterSidebar">
+            <div class="filters__section">
+                <h3>Categories</h3>
+                <ul class="filters__list">
+                    <li><a href="{% url 'catalog:product_list' %}" {% if not current_category %}class="active"{% endif %}>All</a></li>
+                    {% for category in categories %}
+                        <li><a href="?category={{ category.slug }}" {% if current_category == category.slug %}class="active"{% endif %}>{{ category.name }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+            <div class="filters__section">
+                <h3>Tags</h3>
+                <ul class="filters__list">
+                    {% for tag in tags %}
+                        <li><a href="?tag={{ tag.slug }}" {% if current_tag == tag.slug %}class="active"{% endif %}>{{ tag.name }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+            <div class="filters__section">
+                <h3>Price Range</h3>
+                <form method="get" action="{% url 'catalog:product_list' %}">
+                    {% if current_category %}<input type="hidden" name="category" value="{{ current_category }}">{% endif %}
+                    {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+                    <div class="form-group">
+                        <label>Min Price</label>
+                        <input type="number" name="min_price" value="{{ min_price }}" class="form-control" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Max Price</label>
+                        <input type="number" name="max_price" value="{{ max_price }}" class="form-control" step="0.01">
+                    </div>
+                    <button type="submit" class="btn btn--primary">Apply</button>
+                </form>
+            </div>
+        </aside>
+        
+        <div class="products-container" style="flex: 1;">
+            <div class="products-header">
+                <form method="get" action="{% url 'catalog:product_list' %}" style="display: flex; gap: 1rem; align-items: center;">
+                    {% if current_category %}<input type="hidden" name="category" value="{{ current_category }}">{% endif %}
+                    {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+                    {% if min_price %}<input type="hidden" name="min_price" value="{{ min_price }}">{% endif %}
+                    {% if max_price %}<input type="hidden" name="max_price" value="{{ max_price }}">{% endif %}
+                    <label>Sort by:</label>
+                    <select name="sort" onchange="this.form.submit()" class="form-control" style="width: auto;">
+                        <option value="relevance" {% if current_sort == 'relevance' %}selected{% endif %}>Relevance</option>
+                        <option value="price_asc" {% if current_sort == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+                        <option value="price_desc" {% if current_sort == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+                        <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Newest</option>
+                    </select>
+                </form>
+            </div>
+            
+            <div class="product-grid">
+                {% for product in products %}
+                    <a href="{{ product.get_absolute_url }}" class="product-card">
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-card__image">
+                        {% else %}
+                            <div class="product-card__image"></div>
+                        {% endif %}
+                        <div class="product-card__content">
+                            <h3 class="product-card__name">{{ product.name }}</h3>
+                            <p class="product-card__price">${{ product.price }}</p>
+                            {% if product.is_in_stock %}
+                                <span class="product-card__stock">In Stock</span>
+                            {% else %}
+                                <span class="product-card__stock">Out of Stock</span>
+                            {% endif %}
+                        </div>
+                    </a>
+                {% empty %}
+                    <p>No products found.</p>
+                {% endfor %}
+            </div>
+            
+            {% if products.has_other_pages %}
+                <ul class="pagination">
+                    {% if products.has_previous %}
+                        <li><a href="?page={{ products.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}">Previous</a></li>
+                    {% endif %}
+                    {% for num in products.paginator.page_range %}
+                        {% if products.number == num %}
+                            <li><span class="current">{{ num }}</span></li>
+                        {% else %}
+                            <li><a href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}">{{ num }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    {% if products.has_next %}
+                        <li><a href="?page={{ products.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}">Next</a></li>
+                    {% endif %}
+                </ul>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

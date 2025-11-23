@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} - Marketplace{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin: 2rem 0;">
+        <div>
+            {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}" style="width: 100%; border-radius: 0.5rem;">
+            {% else %}
+                <div style="width: 100%; height: 400px; background-color: #F9FAFB; border-radius: 0.5rem;"></div>
+            {% endif %}
+        </div>
+        
+        <div>
+            <h1>{{ product.name }}</h1>
+            <p class="product-card__price" style="font-size: 2rem; margin: 1rem 0;">${{ product.price }}</p>
+            
+            {% if product.is_in_stock %}
+                <p style="color: var(--color-success); margin: 1rem 0;">✓ In Stock ({{ product.stock }} available)</p>
+            {% else %}
+                <p style="color: var(--color-error); margin: 1rem 0;">✗ Out of Stock</p>
+            {% endif %}
+            
+            <p style="margin: 1.5rem 0; color: var(--color-text-light);">{{ product.description|default:"No description available." }}</p>
+            
+            <div style="margin: 1.5rem 0;">
+                <p><strong>Category:</strong> <a href="{% url 'catalog:product_list' %}?category={{ product.category.slug }}">{{ product.category.name }}</a></p>
+                {% if product.tags.all %}
+                    <p><strong>Tags:</strong>
+                        {% for tag in product.tags.all %}
+                            <a href="{% url 'catalog:product_list' %}?tag={{ tag.slug }}">{{ tag.name }}</a>{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </p>
+                {% endif %}
+            </div>
+            
+            {% if product.is_in_stock %}
+                <form method="post" action="{% url 'cart:cart_add' product.id %}" style="margin-top: 2rem;">
+                    {% csrf_token %}
+                    <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem;">
+                        <label for="quantity">Quantity:</label>
+                        <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{ product.stock }}" class="form-control" style="width: 100px;">
+                    </div>
+                    <button type="submit" class="btn btn--flame">Add to Cart</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+    
+    {% if related_products %}
+        <section style="margin: 3rem 0;">
+            <h2>Related Products</h2>
+            <div class="product-grid">
+                {% for product in related_products %}
+                    <a href="{{ product.get_absolute_url }}" class="product-card">
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-card__image">
+                        {% else %}
+                            <div class="product-card__image"></div>
+                        {% endif %}
+                        <div class="product-card__content">
+                            <h3 class="product-card__name">{{ product.name }}</h3>
+                            <p class="product-card__price">${{ product.price }}</p>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+</div>
+{% endblock %}
+

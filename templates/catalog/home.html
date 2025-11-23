@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home - Marketplace{% endblock %}
+
+{% block content %}
+<div class="container">
+    <section class="hero">
+        <h1>Welcome to Marketplace</h1>
+        <p>Discover amazing products at great prices</p>
+    </section>
+
+    <section class="featured">
+        <h2>Featured Products</h2>
+        <div class="product-grid">
+            {% for product in featured_products %}
+                <a href="{{ product.get_absolute_url }}" class="product-card">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-card__image">
+                    {% else %}
+                        <div class="product-card__image"></div>
+                    {% endif %}
+                    <div class="product-card__content">
+                        <h3 class="product-card__name">{{ product.name }}</h3>
+                        <p class="product-card__price">${{ product.price }}</p>
+                        {% if product.is_in_stock %}
+                            <span class="product-card__stock">In Stock</span>
+                        {% else %}
+                            <span class="product-card__stock">Out of Stock</span>
+                        {% endif %}
+                    </div>
+                </a>
+            {% empty %}
+                <p>No featured products available.</p>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %}
+

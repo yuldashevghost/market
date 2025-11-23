@@ -1,0 +1,97 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Marketplace{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header__content">
+                <div class="header__logo">
+                    <a href="{% url 'catalog:home' %}">Marketplace</a>
+                </div>
+                
+                <form class="header__search" method="get" action="{% url 'catalog:product_list' %}">
+                    <input type="search" name="q" placeholder="Search products..." value="{{ request.GET.q }}">
+                    <button type="submit">Search</button>
+                </form>
+                
+                <nav class="header__nav">
+                    <button class="header__menu-toggle" id="menuToggle" aria-label="Toggle menu">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                    <ul class="header__nav-list" id="navList">
+                        <li><a href="{% url 'catalog:product_list' %}">Products</a></li>
+                        {% if user.is_authenticated %}
+                            <li><a href="{% url 'accounts:profile' %}">Profile</a></li>
+                            <li><a href="{% url 'accounts:logout' %}">Logout</a></li>
+                        {% else %}
+                            <li><a href="{% url 'accounts:login' %}">Login</a></li>
+                            <li><a href="{% url 'accounts:register' %}">Register</a></li>
+                        {% endif %}
+                        <li class="header__cart">
+                            <a href="{% url 'cart:cart_detail' %}" class="header__cart-link">
+                                Cart
+                                <span class="header__cart-badge" id="cartBadge">{{ cart.get_item_count|default:0 }}</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        {% if messages %}
+            <div class="messages">
+                <div class="container">
+                    {% for message in messages %}
+                        <div class="message message--{{ message.tags }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer__content">
+                <div class="footer__section">
+                    <h3>About</h3>
+                    <p>Your trusted marketplace for quality products.</p>
+                </div>
+                <div class="footer__section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="{% url 'catalog:product_list' %}">All Products</a></li>
+                        {% if user.is_authenticated %}
+                            <li><a href="{% url 'accounts:profile' %}">My Profile</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="footer__section">
+                    <h3>Contact</h3>
+                    <p>Email: support@marketplace.com</p>
+                </div>
+            </div>
+            <div class="footer__bottom">
+                <p>&copy; 2024 Marketplace. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
+
